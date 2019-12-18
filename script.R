@@ -6,7 +6,7 @@ dataset = read.csv('FRvideos.csv')
 
 #View(dataset)
 #str(dataset)
-#ummary(dataset)
+#summary(dataset)
 
 # Add column
 
@@ -15,4 +15,7 @@ dataset$publish_time = as.Date(dataset$publish_time, format = '%Y-%m-%d')
 
 dataset = transform(dataset, time_before_trending = trending_date - publish_time)
 
+write.csv(dataset, file = "FRvideos_processed.csv")
+
 View(dataset)
+
