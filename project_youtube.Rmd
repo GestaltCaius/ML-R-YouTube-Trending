@@ -1,0 +1,116 @@
+---
+title: "La recette du succès sur Youtube"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#library(ggplot2)
+#Required Packages
+library(tm)
+#library(SnowballC)
+library(wordcloud)
+```
+
+## Présentation du Dataset
+
+Le dataset présente 30581 vidéos selon 16 critères, comprenant notamment le nombre de likes et dislike, de commentaires, et de vues.
+Nous allons dans un premier temps faire un nuage de mots afin de repéré quels mots dans les titres des vidéos sont les plus attirants.
+Nous allons ensuite essayer de déterminer quels sont les paramètres qui influent sur le succès d'une vidéo.
+Nous définissons le succès d'une vidéo comme étant le temps qu'il faut à la vidéo pour être "trending"
+
+On remarque que toutes les vidéos du dataset sont marquées comme trending. On décide donc de créer une nouvelle variable : le temps nécéssaire pour qu'une vidéo devienne trending. Nous partons du principe que si une vidéo met plus d'un certain temps pour devenir trending, alors ce n'est pas le meilleur exemple à suivre (cela peut être du à d'autres facteur notammentla réputation de la chaîne).
+
+
+## Analyse du dataset
+
+Pour une meilleure utilisation du dataset, nous avons ajouté une colonne : le temps que la vidéo a mis avant d'être considérée trending. Nous allons analyser cette variable pour savoir si une vidéo a du succès rapidement, ou non.
+
+La première étape est de transformerles colonnes pour pouvoir les utiliser :
+
+```{r youtube}
+
+dataset = read.csv('FRvideos.csv')
+
+dataset$trending_date = as.Date(dataset$trending_date, format = '%y.%d.%m')
+dataset$publish_time = as.Date(dataset$publish_time, format = '%Y-%m-%d')
+
+dataset = transform(dataset, time_before_trending = trending_date - publish_time)
+
+dataset$time_before_trending = as.numeric(dataset$time_before_trending)
+summary(dataset$time_before_trending)
+
+boxplot(dataset$time_before_trending)
+
+```
+
+On peut voir que trois quart des vidéos du dataset deviennent trending sous 2 jours après leur publication. 
+
+## Nuage de mots
+
+Nous avons créé plusieurs nuages de mots pour représenter les mots les plus utilisés pour les titres, les descriptions, et les tags
+
+```{r nuage titres,echo = FALSE}
+# TITRE
+
+corpus = VCorpus(VectorSource(dataset$title))
+as.character(corpus[[1]])
+lapply(corpus[2:4], as.character)
+corpus_clean = tm_map(corpus, content_transformer(tolower))
+as.character(corpus[[1]])
+as.character(corpus_clean[[1]])
+corpus_clean = tm_map(corpus_clean, removeNumbers)
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "french"))
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "en"))
+corpus_clean = tm_map(corpus_clean, removePunctuation)
+ms_corpus_clean = tm_map(corpus_clean, stemDocument)
+corpus_clean = tm_map(corpus_clean, stripWhitespace)
+inspect(corpus_clean[1:2])
+lapply(corpus[1:4], as.character)
+
+wordcloud(corpus_clean, min.freq=50, random.order = FALSE)
+
+# DESCRIPTION
+
+corpus = VCorpus(VectorSource(dataset$description))
+as.character(corpus[[1]])
+lapply(corpus[2:4], as.character)
+corpus_clean = tm_map(corpus, content_transformer(tolower))
+as.character(corpus[[1]])
+as.character(corpus_clean[[1]])
+corpus_clean = tm_map(corpus_clean, removeNumbers)
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "french"))
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "en"))
+corpus_clean = tm_map(corpus_clean, removePunctuation)
+ms_corpus_clean = tm_map(corpus_clean, stemDocument)
+corpus_clean = tm_map(corpus_clean, stripWhitespace)
+inspect(corpus_clean[1:2])
+lapply(corpus[1:4], as.character)
+
+wordcloud(corpus_clean, min.freq=50, random.order = FALSE)
+
+# TAGS
+
+corpus = VCorpus(VectorSource(dataset$tags))
+as.character(corpus[[1]])
+lapply(corpus[2:4], as.character)
+corpus_clean = tm_map(corpus, content_transformer(tolower))
+as.character(corpus[[1]])
+as.character(corpus_clean[[1]])
+corpus_clean = tm_map(corpus_clean, removeNumbers)
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "french"))
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "en"))
+corpus_clean = tm_map(corpus_clean, removePunctuation)
+ms_corpus_clean = tm_map(corpus_clean, stemDocument)
+corpus_clean = tm_map(corpus_clean, stripWhitespace)
+inspect(corpus_clean[1:2])
+lapply(corpus[1:4], as.character)
+
+wordcloud(corpus_clean, min.freq=50, random.order = FALSE)
+```
+
+
+## Prédiction de la date de succès
+```{r prediction}
+
+```
