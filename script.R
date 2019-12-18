@@ -36,6 +36,7 @@ as.character(corpus[[1]])
 as.character(corpus_clean[[1]])
 corpus_clean = tm_map(corpus_clean, removeNumbers)
 corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "french"))
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "en"))
 corpus_clean = tm_map(corpus_clean, removePunctuation)
 ms_corpus_clean = tm_map(corpus_clean, stemDocument)
 corpus_clean = tm_map(corpus_clean, stripWhitespace)
@@ -62,3 +63,31 @@ inspect(corpus_clean[1:2])
 lapply(corpus[1:4], as.character)
 
 wordcloud(corpus_clean, min.freq=50, random.order = FALSE)
+
+# TAGS
+
+corpus = VCorpus(VectorSource(dataset$tags))
+as.character(corpus[[1]])
+lapply(corpus[2:4], as.character)
+corpus_clean = tm_map(corpus, content_transformer(tolower))
+as.character(corpus[[1]])
+as.character(corpus_clean[[1]])
+corpus_clean = tm_map(corpus_clean, removeNumbers)
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "french"))
+corpus_clean = tm_map(corpus_clean, removeWords, stopwords(kind = "en"))
+corpus_clean = tm_map(corpus_clean, removePunctuation)
+ms_corpus_clean = tm_map(corpus_clean, stemDocument)
+corpus_clean = tm_map(corpus_clean, stripWhitespace)
+inspect(corpus_clean[1:2])
+lapply(corpus[1:4], as.character)
+
+wordcloud(corpus_clean, min.freq=50, random.order = FALSE)
+
+# CALCUL de l'arbre de decision
+
+shuffled_dataset = sample(nrow(dataset))
+rf.wines = randomForest(quality ~ ., data = train, mtry = 4 )
+rfpredict_wines = predict(rf.wines, test)
+cor(test$quality, rfpredict_wines)
+
+
